@@ -1,0 +1,19 @@
+module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
+
+module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData); 
+
+module InstructionMemory(Address, Instruction); 
+
+module Mux32Bit2To1(out, inA, inB, sel);
+
+module PCAdder(PCResult, PCAddResult);
+
+module ProgramCounter(Address, PCResult, Reset, Clk);
+
+module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, Clk, ReadData1, ReadData2);
+
+module SignExtension(in, out);
+
+module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
+
+module Controller(Instruction, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ALUSrc2, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt);

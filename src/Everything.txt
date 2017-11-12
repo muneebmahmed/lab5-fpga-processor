@@ -1,0 +1,725 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - ALU32Bit.v
+// Description - 32-Bit wide arithmetic logic unit (ALU).
+//
+// INPUTS:-
+// ALUControl: 4-Bit input control bits to select an ALU operation.
+// A: 32-Bit input port A.
+// B: 32-Bit input port B.
+//
+// OUTPUTS:-
+// ALUResult: 32-Bit ALU result output.
+// ZERO: 1-Bit output flag. 
+//
+// FUNCTIONALITY:-
+// Design a 32-Bit ALU, so that it supports a set of arithmetic and 
+// logical operaitons. The 'ALUResult' will output the corresponding 
+// result of the operation based on the 32-Bit inputs, 'A', and 'B'. 
+// The 'Zero' flag is high when 'ALUResult' is '0'. 
+// The 'ALUControl' signal determines the function of the ALU based 
+// on the table below. 
+
+// Op|'ALUControl' value  | Description | Notes
+// ==========================
+// ADDITION       | 0000 | ALUResult = A + B
+// SUBRACTION     | 0001 | ALUResult = A - B
+// MULTIPLICATION | 0010 | ALUResult = A * B        (see notes below)
+// AND            | 0011 | ALUResult = A and B
+// OR             | 0100 | ALUResult = A or B
+// SET LESS THAN  | 0101 | ALUResult =(A < B)? 1:0  (see notes below)
+// SET EQUAL      | 0110 | ALUResult =(A=B)  ? 1:0
+// SET NOT EQUAL  | 0111 | ALUResult =(A!=B) ? 1:0
+// LEFT SHIFT     | 1000 | ALUResult = A << B       (see notes below)
+// RIGHT SHIFT    | 1001 | ALUResult = A >> B	    (see notes below)
+// ROTATE RIGHT   | 1010 | ALUResult = A ROTR B     (see notes below)
+
+//--// Below instructions will be in in Part 2 //--// 
+// COUNT ONES     | 1011 | ALUResult = A CLO        (see notes below)
+// COUNT ZEROS    | 1100 | ALUResult = A CLZ        (see notes below)
+//
+// NOTES:-
+// MULTIPLICATION : 32-bit signed multiplication results with 64-bit output.
+//                  ALUResult will be set to lower 32 bits of the product value. 
+//
+// SET LESS THAN : ALUResult is '32'h000000001' if A < B.
+// 
+// LEFT SHIFT: The contents of the 32-bit "A" input are shifted left, 
+//             inserting zeros into the emptied bits by the amount 
+//             specified in B.
+// RIGHT SHIFT: The contents of the 32-bit "A" input are shifted right, 
+//             inserting zeros into the emptied bits by the amount 
+//             specified in B.
+//
+// ROTR: logical right-rotate of a word by a fixed number of bits. 
+//       The contents of the 32-bit "A" input are rotated right. 
+//       The bit-rotate amount is specified by "B".
+//	     ((A >> B) | (A << (32-B)))
+//
+//--// Below instructions will be in in Part 2 //--// 
+// CLO: Count the number of leading ones in a word.
+//      Bits 31..0 of the input "A" are scanned from most significant to 
+//      least significant bit.  
+// 
+// CLZ: Count the number of leading zeros in a word.
+//      Bits 31..0 of the input "A" are scanned from most significant to 
+//      least significant bit.  
+//
+// 
+////////////////////////////////////////////////////////////////////////////////
+
+module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
+
+	input [3:0] ALUControl; // control bits for ALU operation
+	input [31:0] A, B;	    // inputs
+
+	output reg [31:0] ALUResult;	// answer
+	output reg Zero;	    // Zero=1 if ALUResult == 0
+
+	reg [31:0] Result;
+	reg [31:0] X;
+	reg [4:0] I;
+
+	always @(ALUControl, A, B) begin
+		case (ALUControl)
+			0: begin
+				ALUResult <= A + B;
+			end
+			1: begin
+				ALUResult <= A - B;
+			end
+			2: begin
+				ALUResult <= (A * B);//[31:0];
+			end
+			3: begin
+				ALUResult <= A & B;
+			end
+			4: begin
+				ALUResult <= A | B;
+			end
+			5: begin
+				ALUResult <= (A < B)? 32'h1 : 32'h0; //ALUResult <= (A<B); also works, is more compact
+			end
+			6: begin
+				ALUResult <= (A == B);
+			end
+			7: begin
+				ALUResult <= (A != B);
+			end
+			8: begin
+				ALUResult <= (A << B);
+			end
+			9: begin
+				ALUResult <= (A >> B);
+			end
+			10: begin
+				//should we just use for loop instead?
+				ALUResult <= ((A >> B) | (A << (32-B)));
+				/*
+				if (B%32 == 0) begin
+					ALUResult <= A;
+				end
+				else begin
+					ALUResult <= { A[B%32-1:0] ,A[31:B%32] };
+				end*/
+			end
+			11: begin
+				X = ~A;
+				Result = 0;
+				for (I = 5'd16; |I; I = I>>1) begin
+					if (|(X >> I))
+						X = X >> I;
+					else
+						Result = Result + I;
+				end
+				Result = Result + ~X[0];
+				ALUResult = Result;
+			end
+			12: begin
+				X = A;
+				Result = 0;
+				for (I = 5'd16; |I; I = I>>1) begin
+					if (|(X >> I))
+						X = X >> I;
+					else 
+						Result = Result + I;
+				end
+				Result = Result + ~X[0];
+				ALUResult = Result;
+			end
+			default: begin
+				ALUResult <= 32'h0;
+			end
+		endcase
+		//Zero == (ALUResult == 0)? 1 : 0; //Could just write Zero == ALUResult == 0;
+		//I think we need continuous assignment since zero should be updated AFTER ALUResult, not at same time
+		Zero = (ALUResult == 0);
+	end
+
+endmodule
+
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - data_memory.v
+// Description - 32-Bit wide data memory.
+//
+// INPUTS:-
+// Address: 32-Bit address input port.
+// WriteData: 32-Bit input port.
+// Clk: 1-Bit Input clock signal.
+// MemWrite: 1-Bit control signal for memory write.
+// MemRead: 1-Bit control signal for memory read.
+//
+// OUTPUTS:-
+// ReadData: 32-Bit registered output port.
+//
+// FUNCTIONALITY:-
+// Design the above memory similar to the 'RegisterFile' model in the previous 
+// assignment.  Create a 1K (x32) memory, for which we need 10 bits for the address.  
+// In order to implement byte addressing, we will use bits Address[11:2] to index the 
+// memory location. 
+// The 'WriteData' value is written into the location whose address 
+// corresponds to Address[11:2] in the positive clock edge if 'MemWrite' 
+// signal is 1. 
+// 'ReadData' is the value of memory location Address[11:2] if 
+// 'MemRead' is 1, otherwise, it is 0x00000000. The reading of memory is NOT clocked.
+//
+// you need to declare a 2d array. in this case we need 
+// an array of 1024 (1K) 32-bit elements (1024 elements where each element is 32-bit wide).  
+// for example, to declare an array of 256 32-bit elements, declaration is: reg[31:0] memory[0:255]
+////////////////////////////////////////////////////////////////////////////////
+
+module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData); 
+
+    input [31:0] Address; 	// Input Address 
+    input [31:0] WriteData; // Data that needs to be written into the address 
+    input Clk;
+    input MemWrite; 		// Control signal for memory write 
+    input MemRead; 			// Control signal for memory read 
+
+    output reg[31:0] ReadData; // Contents of memory location at Address
+
+    /* Please fill in the implementation here */
+    reg [31:0] memory [0:1023];
+    
+	always @(posedge Clk) begin
+        if (MemWrite == 1'b1) begin
+            memory[Address[11:2]] <= WriteData;
+        end
+    end    
+    
+    always @(*) begin
+        if (MemRead == 1'b1) begin
+                ReadData <= memory[Address[11:2]];
+        end
+        else
+                ReadData <= 32'h0;    
+    end    
+endmodule
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - InstructionMemory.v
+// Description - 32-Bit wide instruction memory.
+//
+// INPUT:-
+// Address: 32-Bit address input port.
+//
+// OUTPUT:-
+// Instruction: 32-Bit output port.
+//
+// FUNCTIONALITY:-
+// Similar to the DataMemory, this module should also be byte-addressed
+// (i.e., ignore bits 0 and 1 of 'Address'). All of the instructions will be 
+// hard-coded into the instruction memory, so there is no need to write to the 
+// InstructionMemory.  The contents of the InstructionMemory is the machine 
+// language program to be run on your processor.
+//
+//
+//we will store the machine code for a C function later. for now initialize 
+//each entry to be its index * 4 (memory[i] = i * 4;)
+//all you need to do is give an address as input and read the contents of the 
+//address on your output port. 
+// 
+//Using a 32bit address you will index into the memory, output the contents of that specific 
+//address. for data memory we are using 1K word of storage space. for the instruction memory 
+//you may assume smaller size for practical purpose. you can use 128 words as the size and 
+//hardcode the values.  in this case you need 7 bits to index into the memory. 
+//
+//be careful with the least two significant bits of the 32bit address. those help us index 
+//into one of the 4 bytes in a word. therefore you will need to use bit [8-2] of the input address. 
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+module InstructionMemory(Address, Instruction); 
+
+    input [31:0] Address;        // Input Address 
+
+    output reg [31:0] Instruction;    // Instruction at memory location Address
+    
+   //Create 2D array for memory with 128 32-bit elements here
+        reg [31:0] memory [0:127];
+        
+        /* Please fill in the implementation here */      
+        initial begin                   //need to iniitalize this for the code!!!
+            memory[0] = 32'h2010000e;    //    main:   addi   $s0, $zero, 14                  #so = RegFile[16] = 14  (0+14)
+            memory[1] = 32'h2011000f;    //        addi    $s1, $zero, 15               #s1 = RegFile[17] = 15  (0+15)
+            memory[2] = 32'h2012001d;    //        addi    $s2, $zero, 29               #s2 = RegFile[18] = 29  (0+29)
+            memory[3] = 32'h2013fff1;    //        addi    $s3, $zero, -15              #s3 = RegFile[19] = -15 (0+-15)
+            memory[4] = 32'h02324020;    //        add     $t0, $s1, $s2                #t0 = RegFile[8] = 44  (15+29)
+            memory[5] = 32'h02504024;    //        and     $t0, $s2, $s0                #t0 = 12  (29 AND 14 => 11101 AND 01110 = 01100 = 12)
+            memory[6] = 32'h72114002;    //        mul     $t0, $s0, $s1                #t0 = 210 (14*15)
+            memory[7] = 32'h02504025;    //        or      $t0, $s2, $s0                #t0 = 31  (29 OR 14 => 11101 OR 01110 = 11111 = 31) 
+            memory[8] = 32'h36080010;    //        ori     $t0, $s0, 16                 #t0 = 30  (14 OR 16 = 01110 OR 10000 = 11110 = 30)
+            memory[9] = 32'h02124022;    //        sub     $t0, $s0, $s2                #t0 = -15 (14-29)  
+            memory[10] = 32'h72604021;    //        clo    $t0, $s3                     #t0 = 28  (count leading 1 of s3 = -15 =  1111 1111 1111 1111 1111 1111 1111 0001)
+            memory[11] = 32'h72404020;    //        clz    $t0, $s2                     #t0 = 27  (count leading 0 of s2 = 29 = 0000 0000 0000 0000 0000 0000 0001 1101)
+            memory[12] = 32'h0211402a;    //        slt    $t0, $s0, $s1                #t0 = 1
+            memory[13] = 32'h0230402a;    //        slt    $t0, $s1, $s0                #t0 = 0
+            memory[14] = 32'h00114080;    //        sll    $t0, $s1, 2                  #t0 = 60  (15*4)
+            memory[15] = 32'h001240c2;    //        srl    $t0, $s2, 3                  #t0 = 3   (29/8)
+           
+        end
+        
+        always @ * begin
+            Instruction <= memory[Address[8:2]];    
+        end
+        
+        
+    endmodule
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - Mux32Bit2To1.v
+// Description - Use the sel input signal to choose which 32-bit inputs should be at the output
+//              - sel = 1, out = inA
+//              - sel = 0, out = inB
+////////////////////////////////////////////////////////////////////////////////
+
+module Mux32Bit2To1(out, inA, inB, sel);
+
+    output reg [31:0] out;
+    
+    input [31:0] inA;
+    input [31:0] inB;
+    input sel;
+
+    always @(inA, inB, sel) begin
+        if (sel)
+            out <= inA;
+        else
+            out <= inB;
+    end
+    
+endmodule
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - PCAdder.v
+// Description - 32-Bit program counter (PC) adder.
+// 
+// INPUTS:-
+// PCResult: 32-Bit input port.
+// 
+// OUTPUTS:-
+// PCAddResult: 32-Bit output port.
+//
+// FUNCTIONALITY:-
+// Design an incrementor by 4 
+// (a hard-wired ADDER whose first input is from the PCResult, and 
+// whose second input is a hard-wired value of 4 that outputs PCResult + 4. 
+// The result should always be an increment of the signal 'PCResult' by 4 (i.e., PCAddResult = PCResult + 4).
+////////////////////////////////////////////////////////////////////////////////
+
+module PCAdder(PCResult, PCAddResult);
+
+    input [31:0] PCResult;
+
+    output reg [31:0] PCAddResult;
+
+    always @(PCResult) begin
+        PCAddResult <= PCResult + 4;
+    end
+
+endmodule
+
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - ProgramCounter.v
+// Description - 32-Bit program counter (PC) register.
+//
+// INPUTS:-
+// Address: 32-Bit address input port.
+// Reset: 1-Bit input control signal.
+// Clk: 1-Bit input clock signal.
+//
+// OUTPUTS:-
+// PCResult: 32-Bit registered output port.
+
+//FUNCTIONALITY: a 32-bit register with a synchronous reset. 
+//At the positive edge of the clock, if reset = 1, the 32-bit output is all 0's
+//else the output is the 32-bit input
+
+// FUNCTIONALITY (you can skip this paragraph for the first week of lab assignment):-
+// Design a program counter register that holds the current address of the 
+// instruction memory.  This module should be updated at the positive edge of 
+// the clock. The contents of a register default to unknown values or 'X' upon 
+// instantiation in your module. Hence, please add a synchronous 'Reset' 
+// signal to your PC register to enable global reset of your datapath to point 
+// to the first instruction in your instruction memory (i.e., the first address 
+// location, 0x00000000H).
+////////////////////////////////////////////////////////////////////////////////
+
+module ProgramCounter(Address, PCResult, Reset, Clk);
+
+	input [31:0] Address;
+	input Reset, Clk;
+
+	output reg [31:0] PCResult;
+
+	always @(posedge Clk) begin
+		if (Reset == 1)
+			PCResult <= 32'h0;
+		else
+			PCResult <= Address;
+	end
+
+endmodule
+
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+
+// Module - register_file.v
+// Description - Implements a register file with 32 32-Bit wide registers.
+//                          (a 32x32 regsiter file with two read ports and one write port)
+// INPUTS:-
+// ReadRegister1: 5-Bit address to select a register to be read through 32-Bit 
+//                output port 'ReadRegister1'.
+// ReadRegister2: 5-Bit address to select a register to be read through 32-Bit 
+//                output port 'ReadRegister2'.
+// WriteRegister: 5-Bit address to select a register to be written through 32-Bit
+//                input port 'WriteRegister'.
+// WriteData: 32-Bit write input port.
+// RegWrite: 1-Bit control input signal.
+//
+// OUTPUTS:-
+// ReadData1: 32-Bit registered output. 
+// ReadData2: 32-Bit registered output. 
+//
+// FUNCTIONALITY:-
+// 'ReadRegister1' and 'ReadRegister2' are two 5-bit addresses to read two 
+// registers simultaneously. The two 32-bit data sets are available on ports 
+// 'ReadData1' and 'ReadData2', respectively. 'ReadData1' and 'ReadData2' are 
+// registered outputs (output of register file is written into these registers 
+// at the falling edge of the clock). You can view it as if outputs of registers
+// specified by ReadRegister1 and ReadRegister2 are written into output 
+// registers ReadData1 and ReadData2 at the falling edge of the clock. 
+//
+// 'RegWrite' signal is high during the rising edge of the clock if the input 
+// data is to be written into the register file. The contents of the register 
+// specified by address 'WriteRegister' in the register file are modified at the 
+// rising edge of the clock if 'RegWrite' signal is high. The D-flip flops in 
+// the register file are positive-edge (rising-edge) triggered. (You have to use 
+// this information to generate the write-clock properly.) 
+//
+// NOTE:-
+// We will design the register file such that the contents of registers do not 
+// change for a pre-specified time before the falling edge of the clock arrives 
+// to allow for data multiplexing and setup time.
+////////////////////////////////////////////////////////////////////////////////
+
+module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, Clk, ReadData1, ReadData2);
+
+	input RegWrite, Clk;
+	input [4:0] ReadRegister1, ReadRegister2, WriteRegister;
+	input [31:0] WriteData;
+
+	output reg [31:0] ReadData1, ReadData2;
+	//creates 32 32-bit registers
+	reg [31:0] regFile [0:31];
+
+	initial begin
+		regFile[0] <= 32'h0;
+	end
+
+	always @(posedge Clk) begin
+		if (RegWrite) begin
+			regFile[WriteRegister] <= WriteData;
+		end
+	end
+
+	always @(negedge Clk) begin
+		ReadData1 <= regFile[ReadRegister1];
+		ReadData2 <= regFile[ReadRegister2];
+	end
+
+endmodule
+`timescale 1ns / 1ps
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Nirmal Kumbhare, Ali Akoglu
+// 
+// Module - SignExtension.v
+// Description - Sign extension module.  
+// If the most significant bit of in (in[15]) = 0, 
+//create the 32-bit "out" output by making out[15:0] equal to "in" and make other bits (bits 16 to 31) to 0
+// If the most significant bit of in (in[15]) = 1, 
+//create the 32-bit "out" output by making out[15:0] equal to "in" and make other bits to 1
+////////////////////////////////////////////////////////////////////////////////
+module SignExtension(in, out);
+
+    /* A 16-Bit input word */
+    input [15:0] in;
+    
+    /* A 32-Bit output word */
+    output reg [31:0] out;   //using always @
+    //output [31:0] out;   //using assign statement
+    
+    always @(in) begin
+        if (in[15])
+            out <= {16'b1111111111111111, in};
+        else
+            out <= {16'b0, in};
+    end
+
+endmodule
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Muneeb Ahmed
+// 
+// Module - Datapath.v
+// Description - Datapath
+//
+// INPUTS:-
+// lots of things
+//
+// OUTPUTS:-
+// WriteData
+// Instruction 
+//
+// FUNCTIONALITY:-
+
+module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
+
+	input Clk, Reset, ALUSrc, MemWrite, MemRead, MemtoReg, RegWrite, PCSrc, ALUSrc2;
+	input [3:0] ALUOp;
+	input [4:0] ReadReg1, ReadReg2, WriteReg;
+	input [15:0] SEInstruction;
+	input [31:0] Shmt;
+	output [31:0] Instruction, WriteData;
+
+	wire [31:0] ReadData1, ReadData2, ALUResult, ReadDataDM, PCount, PCnt4;
+	wire [31:0] ALUMux1, ALUMux2, PCMux, DMMux, SE, SESL2, SESL2Add;
+	wire ALUZero, PCALUZero, PCALUZero2;
+
+	ALU alu(ALUOp, ReadData1, ALUMux2, ALUResult, ALUZero);
+	RegisterFile regFile(ReadReg1, ReadReg2, WriteReg, DMMux, RegWrite, Clk, ReadData1, ReadData2);
+	DataMemory DM(ALUResult, ReadData2, Clk, MemWrite, MemRead, ReadDataDM);
+	Mux32Bit2To1 dmux(DMMux, ReadDataDM, ALUResult, MemtoReg);
+	ProgramCounter pc(PCMux, PCount, Reset, Clk);
+	PCAdder pcadd(PCount, PCnt4);
+	InstructionMemory im(PCount, Instruction);
+	SignExtension se(SEInstruction, SE);
+	Mux32Bit2To1 muxalu(ALUMux1, SE, ReadData2, ALUSrc);
+	Mux32Bit2To1 muxalu2(ALUMux2, Shmt, ALUMux1, ALUSrc2);
+	ALU sl2(8, SE, 2, SESL2, PCALUZero);
+	ALU sl2add(0, PCnt4, SESL2, SESL2Add, PCALUZero2);
+	Mux32Bit2To1 pcmux(PCMux, SESL2Add, PCnt4, PCSrc & ALUZero); //Can I do this
+	//module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
+	//module DataMemory(Address, WriteData,Clk,MemWrite,MemRead, ReadData); 
+	//module InstructionMemory(Address, Instruction); 
+	//module Mux32Bit2To1(out, inA, inB, sel);
+	//module PCAdder(PCResult, PCAddResult);
+	//module ProgramCounter(Address, PCResult, Reset, Clk);
+	//module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, Clk, ReadData1, ReadData2);
+	//module SignExtension(in, out);
+
+	assign WriteData = DMMux;
+
+endmodule
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Muneeb Ahmed
+// 
+// Module - Controller.v
+// Description - Controller
+//
+// INPUTS:-
+// lots of things
+//
+// OUTPUTS:-
+// WriteData
+// Instruction 
+//
+// FUNCTIONALITY:-
+
+module Controller(Instruction, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ALUSrc2, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt);
+	input [31:0] Instruction;
+
+	output reg ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ALUSrc2;
+	output reg [3:0] ALUOp;
+	output reg [4:0] ReadReg1, ReadReg2, WriteReg;
+	output reg [15:0] SEInstruction;
+	output reg [31:0] Shmt;
+
+	always @(Instruction) begin
+		SEInstruction <= Instruction[15:0];
+		Shmt <= {27'b0, Instruction[10:6]};
+		case (Instruction[31:26])
+			MemRead <= 0;
+			MemWrite <= 0;
+			MemtoReg <= 0;
+			PCSrc <= 0;
+			ALUSrc <= 0;
+			ALUSrc2 <= 0;
+			RegWrite <= 1;
+			ReadReg1 <= Instruction[25:21];//not for slr, sll, rotrv
+			WriteReg <= Instruction[15:11];
+			ReadReg2 <= Instruction[20:16];//not for slr, sll, rotrv
+			0: begin
+				case (Instruction[5:0])
+					6'b100000: begin
+						ALUOp <= 0;
+					end
+					6'b100010: begin
+						ALUOp <= 1;
+					end
+					6'b100100: begin
+						ALUOp <= 3;
+					end
+					6'b100101: begin
+						ALUOp <= 4;
+					end
+					6'b101010: begin
+						ALUOp <= 5;
+					end
+					6'b0: begin
+						ReadReg1 <= Instruction[20:16];
+						ALUOp <= 8;
+						ALUSrc2 <= 1;
+					end
+					6'b2: begin
+						ReadReg1 <= Instruction[20:16];
+						ALUOp <= 9;
+						ALUSrc2 <= 1;
+					end
+					6'b6: begin
+						ReadReg1 <= Instruction[20:16];
+						ReadReg2 <= Instruction[25:21];
+						ALUOp <= 10;
+					end
+					default: begin
+						ALUOp <= 0;
+					end
+				endcase
+
+			end
+			28: begin
+				case (Instruction[5:0])
+					6'b100001: begin
+						ALUOp <= 11;
+					end
+					6'b100000: begin
+						ALUOp <= 12;
+					end
+					6'b00010: begin
+						ALUOp <= 2;
+					end
+					default: begin
+						ALUOp <= 11;
+					end
+				endcase
+			end
+			8: begin
+				WriteReg <= Instruction[20:16];
+				ALUSrc <= 1;
+				ALUOp <= 0;
+				ALUSrc2 <= 0;
+			end
+			13: begin
+				WriteReg <= Instruction[20:16];
+				ALUSrc <= 1;
+				ALUOp <= 4;
+			end
+			35: begin
+				WriteReg <= Instruction[20:16];
+				ALUOp <= 0;
+				ALUSrc <= 1;
+				MemRead <= 1;
+				MemtoReg <= 1;
+			end
+			43: begin
+				RegWrite <= 0;
+				ALUOp <= 0;
+				MemWrite <= 1;
+				MemtoReg <= 1;
+				ALUSrc <= 1;
+			end
+			5: begin
+				RegWrite <= 0;
+				PCSrc <= 1;
+			end
+			default: begin
+				ALUOp <= 0;
+			end
+		endcase
+	end
+
+//module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
+
+endmodule
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Last Edits: Muneeb Ahmed
+// 
+// Module - TopProcessor.v
+// Description - Top Module
+//
+// INPUTS:-
+// Clk, Reset
+//
+// OUTPUTS:-
+// WriteData 
+//
+// FUNCTIONALITY:-
+
+module TopProcessor(Clk, Reset, WriteData);
+
+	input Clk, Reset;
+	output [31:0] WriteData;
+
+	wire [3:0] ALUOp;
+	wire ALUSrc, ALUSrc2, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc;
+	wire [4:0] ReadReg1, ReadReg2, WriteReg;
+	wire [15:0] SEInstruction;
+	wire [31:0] Instruction, Shmt;
+
+	Controller controller(Instruction, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ALUSrc2, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt);
+
+	Datapath datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
+
+	//module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
+
+	//module Controller(Instruction, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ALUSrc2, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt);
+
+endmodule
