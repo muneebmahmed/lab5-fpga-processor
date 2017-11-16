@@ -27,16 +27,16 @@ module Controller(Instruction, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWr
 		SEInstruction <= Instruction[15:0];
 		Shmt <= {27'd0, Instruction[10:6]};
 		MemRead <= 0;
-        MemWrite <= 0;
-        MemtoReg <= 0;
-        PCSrc <= 0;
-        ALUSrc <= 0;
-        ALUSrc2 <= 0;
-        ALUOp <= 0;
-        RegWrite <= 1;
-        ReadReg1 <= Instruction[25:21];//not for slr, sll, rotrv
-        WriteReg <= Instruction[15:11];
-        ReadReg2 <= Instruction[20:16];//not for slr, sll, rotrv
+		MemWrite <= 0;
+		MemtoReg <= 0;
+		PCSrc <= 0;
+		ALUSrc <= 0;
+		ALUSrc2 <= 0;
+		ALUOp <= 0;
+		RegWrite <= 1;
+		ReadReg1 <= Instruction[25:21];//not for slr, sll, rotrv
+		WriteReg <= Instruction[15:11];
+		ReadReg2 <= Instruction[20:16];//not for slr, sll, rotrv
 		case (Instruction[31:26])
 
 			6'd0: begin

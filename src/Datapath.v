@@ -15,7 +15,7 @@
 //
 // FUNCTIONALITY:-
 
-module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
+module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData, debug_Reg8, debug_Reg16, debug_Reg17, debug_Reg18, debug_Reg19);
 
 	input Clk, Reset, ALUSrc, MemWrite, MemRead, MemtoReg, RegWrite, PCSrc, ALUSrc2;
 	input [3:0] ALUOp;
@@ -28,8 +28,13 @@ module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite
 	wire [31:0] ALUMux1, ALUMux2, PCMux, DMMux, SE, SESL2, SESL2Add;
 	wire ALUZero, PCALUZero, PCALUZero2, PCSrcandALUZ;
 
+	(* mark_debug = "true" *) output [31:0] debug_Reg8, debug_Reg16, debug_Reg17, debug_Reg18, debug_Reg19;
+
 	ALU32Bit alu(ALUOp, ReadData1, ALUMux2, ALUResult, ALUZero);
-	RegisterFile regFile(ReadReg1, ReadReg2, WriteReg, DMMux, RegWrite, Clk, ReadData1, ReadData2);
+
+	//RegisterFile regFile(ReadReg1, ReadReg2, WriteReg, DMMux, RegWrite, Clk, ReadData1, ReadData2);
+	RegisterFile regFile(ReadReg1, ReadReg2, WriteReg, DMMux, RegWrite, Clk, ReadData1, ReadData2, debug_Reg8, debug_Reg16, debug_Reg17, debug_Reg18, debug_Reg19);
+
 	DataMemory DM(ALUResult, ReadData2, Clk, MemWrite, MemRead, ReadDataDM);
 	Mux32Bit2To1 dmux(DMMux, ReadDataDM, ALUResult, MemtoReg);
 	ProgramCounter pc(PCMux, PCount, Reset, Clk);
