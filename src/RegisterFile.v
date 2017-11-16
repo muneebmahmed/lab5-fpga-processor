@@ -52,6 +52,8 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	
 	//for post-synthesis
 	output [31:0] debug_Reg8, debug_Reg16, debug_Reg17, debug_Reg18, debug_Reg19;
+	//output wire [31:0] out_data;
+	//output wire [31:0] debug_reg;
 
 	//creates 32 32-bit registers
 	(* mark_debug = "true" *) reg [31:0] regFile [0:31];
@@ -77,5 +79,7 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	assign debug_Reg17 = RegFile[17];
 	assign debug_Reg18 = RegFile[18];
 	assign debug_Reg19 = RegFile[19];
+	//assign out_data = regFile[23];
+	//assign debug_reg = regFile[10];
 
 endmodule
