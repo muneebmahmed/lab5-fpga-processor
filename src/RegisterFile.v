@@ -74,11 +74,11 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	end
 
 	//below is for post-synthesis simulation
-	assign debug_Reg8 = RegFile[8];
-	assign debug_Reg16 = RegFile[16];
-	assign debug_Reg17 = RegFile[17];
-	assign debug_Reg18 = RegFile[18];
-	assign debug_Reg19 = RegFile[19];
+	assign debug_Reg8 = regFile[8];
+	assign debug_Reg16 = regFile[16];
+	assign debug_Reg17 = regFile[17];
+	assign debug_Reg18 = regFile[18];
+	assign debug_Reg19 = regFile[19];
 	//assign out_data = regFile[23];
 	//assign debug_reg = regFile[10];
 

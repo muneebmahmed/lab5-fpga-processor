@@ -43,8 +43,10 @@ module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite
 	SignExtension se(SEInstruction, SE);
 	Mux32Bit2To1 muxalu(ALUMux1, SE, ReadData2, ALUSrc);
 	Mux32Bit2To1 muxalu2(ALUMux2, Shmt, ALUMux1, ALUSrc2); //Shmt is at 1
-	ALU32Bit sl2(8, SE, 2, SESL2, PCALUZero);
-	ALU32Bit sl2add(0, PCnt4, SESL2, SESL2Add, PCALUZero2);
+	//ALU32Bit sl2(8, SE, 2, SESL2, PCALUZero);
+	assign SESL2 = { SE[29:0] , 2'b00 };
+	//ALU32Bit sl2add(0, PCnt4, SESL2, SESL2Add, PCALUZero2);
+	assign SESL2Add = PCnt4 + SESL2;
 	assign PCSrcandALUZ = PCSrc & ALUZero;
 	Mux32Bit2To1 pcmux(PCMux, SESL2Add, PCnt4, PCSrcandALUZ); //Can I do this
 	//module ALU32Bit(ALUControl, A, B, ALUResult, Zero);

@@ -46,11 +46,11 @@ module InstructionMemory(Address, Instruction);
         reg [31:0] memory [0:127];
         
         /* Please fill in the implementation here */    
-        initial begin
+        /*initial begin
             for (i = 0; i <128; i = i+1) begin
                memory[i] = i*4;
             end
-         end
+         end*/
           
         initial begin                   //need to iniitalize this for the code!!!
 //            memory[0] = 32'h2010000e;    //    main:   addi   $s0, $zero, 14                  #so = RegFile[16] = 14  (0+14)
@@ -70,56 +70,56 @@ module InstructionMemory(Address, Instruction);
 //            memory[14] = 32'h00114080;    //        sll    $t0, $s1, 2                  #t0 = 60  (15*4)
 //            memory[15] = 32'h001240c2;    //        srl    $t0, $s2, 3                  #t0 = 3   (29/8)
            
-            memory[0] = 32'h34090000;	//	main:	ori	$t1, $zero, 0
-            memory[1] = 32'h2012001d;	//		addi	$s2, $zero, 29
-            memory[2] = 32'h2013000c;	//		addi	$s3, $zero, 12
-            memory[3] = 32'had320004;	//		sw	$s2, 4($t1)
-            memory[4] = 32'had330008;	//		sw	$s3, 8($t1)
-            memory[5] = 32'h8d280004;	//		lw	$t0, 4($t1)
-            memory[6] = 32'h8d280008;	//		lw	$t0, 8($t1)
-            memory[7] = 32'h15120002;	//		bne	$t0, $s2, label1
-            memory[8] = 32'h00004020;	//		add	$t0, $zero, $zero
-            memory[9] = 32'h2008000c;	//		addi	$t0, $zero, 12
-            memory[10] = 32'h15130001;	//	label1:	bne	$t0, $s3, label2
-            memory[11] = 32'h20080001;	//		addi	$t0, $zero, 1
-            memory[12] = 32'h2008001d;	//	label2:	addi	$t0, $zero, 29
+//            memory[0] = 32'h34090000;	//	main:	ori	$t1, $zero, 0
+//            memory[1] = 32'h2012001d;	//		addi	$s2, $zero, 29
+//            memory[2] = 32'h2013000c;	//		addi	$s3, $zero, 12
+//            memory[3] = 32'had320004;	//		sw	$s2, 4($t1)
+//            memory[4] = 32'had330008;	//		sw	$s3, 8($t1)
+//            memory[5] = 32'h8d280004;	//		lw	$t0, 4($t1)
+//            memory[6] = 32'h8d280008;	//		lw	$t0, 8($t1)
+//            memory[7] = 32'h15120002;	//		bne	$t0, $s2, label1
+//            memory[8] = 32'h00004020;	//		add	$t0, $zero, $zero
+//            memory[9] = 32'h2008000c;	//		addi	$t0, $zero, 12
+//            memory[10] = 32'h15130001;	//	label1:	bne	$t0, $s3, label2
+//            memory[11] = 32'h20080001;	//		addi	$t0, $zero, 1
+//            memory[12] = 32'h2008001d;	//	label2:	addi	$t0, $zero, 29
 
-              //Task 3 Instructions
-//            memory[0] = 32'h34040000;	//	main:		ori	$a0, $zero, 0
-//            memory[1] = 32'h34050100;	//			ori	$a1, $zero, 256
-//            memory[2] = 32'h20110000;	//			addi	$s1, $zero, 0
-//            memory[3] = 32'h20120001;	//			addi	$s2, $zero, 1
-//            memory[4] = 32'h20080000;	//			addi	$t0, $zero, 0
-//            memory[5] = 32'h8ca50000;	//			lw	$a1, 0($a1)
-//            memory[6] = 32'h20080004;	//			addi	$t0, $zero, 4
-//            memory[7] = 32'h20100000;	//			addi	$s0, $zero, 0
-//            memory[8] = 32'h70a82802;	//			mul	$a1, $a1, $t0
-//            memory[9] = 32'h20a5fffc;	//			addi	$a1, $a1, -4
-//            memory[10] = 32'h00b08822;	//	outerloop:	sub	$s1, $a1, $s0
-//            memory[11] = 32'h20080000;	//			addi	$t0, $zero, 0
-//            memory[12] = 32'h01044820;	//	innerloop:	add	$t1, $t0, $a0
-//            memory[13] = 32'h8d2a0000;	//			lw	$t2, 0($t1)
-//            memory[14] = 32'h21290004;	//			addi	$t1, $t1, 4
-//            memory[15] = 32'h8d2b0000;	//			lw	$t3, 0($t1)
-//            memory[16] = 32'h016a602a;	//			slt	$t4, $t3, $t2
-//            memory[17] = 32'h15920003;	//			bne	$t4, $s2, noswap
-//            memory[18] = 32'had2a0000;	//			sw	$t2, 0($t1)
-//            memory[19] = 32'h2129fffc;	//			addi	$t1, $t1, -4
-//            memory[20] = 32'had2b0000;	//			sw	$t3, 0($t1)
-//            memory[21] = 32'h21080004;	//	noswap:		addi	$t0, $t0, 4
-//            memory[22] = 32'h0111602a;	//			slt	$t4, $t0, $s1
-//            memory[23] = 32'h1580fff4;	//			bne	$t4, $zero, innerloop
-//            memory[24] = 32'h22100004;	//			addi	$s0, $s0, 4
-//            memory[25] = 32'h0205602a;	//			slt	$t4, $s0, $a1
-//            memory[26] = 32'h1580ffef;	//			bne	$t4, $zero, outerloop
-//            memory[27] = 32'h20080000;	//			addi	$t0, $zero, 0
-//            memory[28] = 32'h20a50004;	//			addi	$a1, $a1, 4
-//            memory[29] = 32'h00808820;	//			add	$s1, $a0, $zero
-//            memory[30] = 32'h8e300000;	//	read_data:	lw	$s0, 0($s1)
-//            memory[31] = 32'h22310004;	//			addi	$s1, $s1, 4
-//            memory[32] = 32'h21080004;	//			addi	$t0, $t0, 4
-//            memory[33] = 32'h1505fffc;	//			bne	$t0, $a1, read_data
-//            memory[34] = 32'h1412ffff;	//	here:		bne	$zero, $s2, here
+            //Task 3 Instructions
+            memory[0] = 32'h34040000;	//	main:		ori	$a0, $zero, 0
+            memory[1] = 32'h34050100;	//			ori	$a1, $zero, 256
+            memory[2] = 32'h20110000;	//			addi	$s1, $zero, 0
+            memory[3] = 32'h20120001;	//			addi	$s2, $zero, 1
+            memory[4] = 32'h20080000;	//			addi	$t0, $zero, 0
+            memory[5] = 32'h8ca50000;	//			lw	$a1, 0($a1)
+            memory[6] = 32'h20080004;	//			addi	$t0, $zero, 4
+            memory[7] = 32'h20100000;	//			addi	$s0, $zero, 0
+            memory[8] = 32'h70a82802;	//			mul	$a1, $a1, $t0
+            memory[9] = 32'h20a5fffc;	//			addi	$a1, $a1, -4
+            memory[10] = 32'h00b08822;	//	outerloop:	sub	$s1, $a1, $s0
+            memory[11] = 32'h20080000;	//			addi	$t0, $zero, 0
+            memory[12] = 32'h01044820;	//	innerloop:	add	$t1, $t0, $a0
+            memory[13] = 32'h8d2a0000;	//			lw	$t2, 0($t1)
+            memory[14] = 32'h21290004;	//			addi	$t1, $t1, 4
+            memory[15] = 32'h8d2b0000;	//			lw	$t3, 0($t1)
+            memory[16] = 32'h016a602a;	//			slt	$t4, $t3, $t2
+            memory[17] = 32'h15920003;	//			bne	$t4, $s2, noswap
+            memory[18] = 32'had2a0000;	//			sw	$t2, 0($t1)
+            memory[19] = 32'h2129fffc;	//			addi	$t1, $t1, -4
+            memory[20] = 32'had2b0000;	//			sw	$t3, 0($t1)
+            memory[21] = 32'h21080004;	//	noswap:		addi	$t0, $t0, 4
+            memory[22] = 32'h0111602a;	//			slt	$t4, $t0, $s1
+            memory[23] = 32'h1580fff4;	//			bne	$t4, $zero, innerloop
+            memory[24] = 32'h22100004;	//			addi	$s0, $s0, 4
+            memory[25] = 32'h0205602a;	//			slt	$t4, $s0, $a1
+            memory[26] = 32'h1580ffef;	//			bne	$t4, $zero, outerloop
+            memory[27] = 32'h20080000;	//			addi	$t0, $zero, 0
+            memory[28] = 32'h20a50004;	//			addi	$a1, $a1, 4
+            memory[29] = 32'h00808820;	//			add	$s1, $a0, $zero
+            memory[30] = 32'h8e300000;	//	read_data:	lw	$s0, 0($s1)
+            memory[31] = 32'h22310004;	//			addi	$s1, $s1, 4
+            memory[32] = 32'h21080004;	//			addi	$t0, $t0, 4
+            memory[33] = 32'h1505fffc;	//			bne	$t0, $a1, read_data
+            memory[34] = 32'h1412ffff;	//	here:		bne	$zero, $s2, here
            
         end
         

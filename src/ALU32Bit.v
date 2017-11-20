@@ -77,7 +77,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 	input [31:0] A, B;	    // inputs
 
 	output reg [31:0] ALUResult;	// answer
-	output reg Zero;	    // Zero=1 if ALUResult == 0
+	output Zero;	    // Zero=1 if ALUResult == 0
 	
 	reg [31:0] X;
 	reg [31:0] Result;
@@ -169,9 +169,8 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				ALUResult <= 32'h0;
 			end
 		endcase
-		//Zero = (ALUResult == 0)? 1 : 0; //Could just write Zero = ALUResult == 0;
+		//Zero == (ALUResult == 0)? 1 : 0; //Could just write Zero == ALUResult == 0;
 		//I think we need continuous assignment since zero should be updated AFTER ALUResult, not at same time
-		//Zero = (ALUResult == 0);
 	end
 	assign Zero = (ALUResult == 0);
 
