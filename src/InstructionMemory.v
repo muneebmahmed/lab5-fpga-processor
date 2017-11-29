@@ -115,11 +115,23 @@ module InstructionMemory(Address, Instruction);
             memory[27] = 32'h20080000;	//			addi	$t0, $zero, 0
             memory[28] = 32'h20a50004;	//			addi	$a1, $a1, 4
             memory[29] = 32'h00808820;	//			add	$s1, $a0, $zero
+            //comment following lines when delaying
             memory[30] = 32'h8e300000;	//	read_data:	lw	$s0, 0($s1)
             memory[31] = 32'h22310004;	//			addi	$s1, $s1, 4
             memory[32] = 32'h21080004;	//			addi	$t0, $t0, 4
             memory[33] = 32'h1505fffc;	//			bne	$t0, $a1, read_data
             memory[34] = 32'h1412ffff;	//	here:		bne	$zero, $s2, here
+
+            //Instructions 30-38 are different for delay:
+//            memory[30] = 32'h340c0104;	//			ori	$t4, $zero, 260
+//            memory[31] = 32'h8e300000;	//	read_data:	lw	$s0, 0($s1)
+//            memory[32] = 32'h8d8d0000;	//			lw	$t5, 0($t4)
+//            memory[33] = 32'h21adffff;	//	display:	addi	$t5, $t5, -1
+//            memory[34] = 32'h15a0fffe;	//			bne	$t5, $zero, display
+//            memory[35] = 32'h22310004;	//			addi	$s1, $s1, 4
+//            memory[36] = 32'h21080004;	//			addi	$t0, $t0, 4
+//            memory[37] = 32'h1505fff9;	//			bne	$t0, $a1, read_data
+//            memory[38] = 32'h1412ffff;	//	here:		bne	$zero, $s2, here
            
         end
         

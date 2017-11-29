@@ -118,6 +118,9 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData);
         memory[63] = 32'h24;
         memory[64] = 32'h40;
 
+        //next line is for delayed sorting:
+        //memory[65] = 32'h9C4;
+
     end
     
 	always @(posedge Clk) begin
