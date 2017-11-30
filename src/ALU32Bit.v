@@ -117,15 +117,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				ALUResult <= (A >> B);
 			end
 			10: begin
-				//should we just use for loop instead?
 				ALUResult <= ((A >> B) | (A << (32-B)));
-				/*
-				if (B%32 == 0) begin
-					ALUResult <= A;
-				end
-				else begin
-					ALUResult <= { A[B%32-1:0] ,A[31:B%32] };
-				end*/
 			end
 			11: begin
 			    X = ~A;
@@ -138,7 +130,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			    end
 			    ALUResult = Result;
 			    if (A == 32'hFFFFFFFF)
-			    ALUResult = 32;
+			        ALUResult = 32;
 			    /*
 			    while (A[I]) begin
 			         Result = Result + 1;
@@ -150,15 +142,15 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			    Result = 0;
 			    X = A;
 			    for (I = 16; |I; I = I >> 1) begin
-                    if (|(X >> I))
-                        X = X >> I;
-                    else
-                        Result = Result + I;
-                end
-                ALUResult = Result;
-                if (A == 0)
-                ALUResult = 32;
-                /*
+			        if (|(X >> I))
+			            X = X >> I;
+			        else
+			            Result = Result + I;
+			    end
+			    ALUResult = Result;
+			    if (A == 0)
+			        ALUResult = 32;
+			    /*
 			    I = 31;
 			    while (~A[I] && I >= 0) begin
 			        Result = Result + 1;
@@ -169,7 +161,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				ALUResult <= 32'h0;
 			end
 		endcase
-		//Zero == (ALUResult == 0)? 1 : 0; //Could just write Zero == ALUResult == 0;
+		//Zero = (ALUResult == 0)? 1 : 0;
 		//I think we need continuous assignment since zero should be updated AFTER ALUResult, not at same time
 	end
 	assign Zero = (ALUResult == 0);
