@@ -42,3 +42,7 @@ set_property IOSTANDARD LVCMOS33 [get_ports Clk]
 set_property IOSTANDARD LVCMOS33 [get_ports {Reset}]
 set_property PACKAGE_PIN N17 [get_ports {Reset}]
 
+##Assign Hold_Clk, change pin later
+set_property IOSTANDARD LVCMOS33 [get_ports {Hold_Clk}]
+set_property PACKAGE_PIN R18 [get_ports {Hold_Clk}]
+

@@ -6,13 +6,13 @@ module ClkDiv(Clk, Rst, ClkOut);
   //to create 100 Hz clock
   //parameter DivVal = 500000;
   //to create 10kHz clock
-  parameter DivVal = 5000;
+  parameter DivVal = 10000; //set to 5000 for faster clock
    reg [25:0] DivCnt;
    reg ClkInt;
 	
    always @(posedge Clk) begin
       if( Rst == 1 )begin
-         DivCnt <= 0;
+         //DivCnt <= 0; //causes it to pause instead of reset
          ClkOut <= 0;
          ClkInt <= 0;
       end
