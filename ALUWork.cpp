@@ -35,6 +35,11 @@ long hexdec( const char *hex) {
    return ret; 
 }
 
+    static const int debruijn32[32] = {
+        0, 31, 9, 30, 3, 8, 13, 29, 2, 5, 7, 21, 12, 24, 28, 19,
+        1, 10, 4, 14, 6, 22, 25, 20, 11, 15, 23, 26, 16, 27, 17, 18
+    };
+
 string dechex(unsigned int dec){
     string ret = "";
     string digits = "0123456789ABCDEF";
@@ -151,16 +156,28 @@ int main (void){
                 cout << "\nZero: " << zero << endl;
                 break;
             case 11:
-                x = decA, count = 0;
-                for (unsigned int i = 16; i; i >>= 1){
-                    if (!(x >> i)){ //use | reduction operator in verilog
-                        count += i;
-                    }
-                    else{
-                        x >>= i;
-                    }
+                x = ~decA;
+                x |= x>>1;
+                x |= x>>2;
+                x |= x>>4;
+                x |= x>>8;
+                x |= x>>16;
+                x++;
+                x = (x*124511785) >> 27;
+                result = debruijn32[x];
+                if (~decA == 0){
+                    result = 32;
                 }
-                result = count + !x;
+//                x = decA, count = 0;
+//                for (unsigned int i = 16; i; i >>= 1){
+//                    if (!(x >> i)){ //use | reduction operator in verilog
+//                        count += i;
+//                    }
+//                    else{
+//                        x >>= i;
+//                    }
+//                }
+//                result = count + !x;
                 //improved for:
                 /*
                 x = decA, count = 0;
@@ -176,12 +193,24 @@ int main (void){
                 cout << "\nZero: " << dec << (result == 0) << endl;
                 break;
             case 12:
-                x = ~decA, count = 0;
-                for (unsigned int i = 16; i; i >>= 1){
-                    if (x >> i){ x >>= i; } //use | reduction operator in verilog to reduct to 1 or 0
-                    else { count += i; }
+                x = decA;
+                x |= x>>1;
+                x |= x>>2;
+                x |= x>>4;
+                x |= x>>8;
+                x |= x>>16;
+                x++;
+                x = (x*124511785) >> 27;
+                result = debruijn32[x];
+                if (decA == 0){
+                    result = 32;
                 }
-                result = count + !x;
+//                x = ~decA, count = 0;
+//                for (unsigned int i = 16; i; i >>= 1){
+//                    if (x >> i){ x >>= i; } //use | reduction operator in verilog to reduct to 1 or 0
+//                    else { count += i; }
+//                }
+//                result = count + !x;
                 cout << "Decimal: " << dec << result << "\tHex: " << hex << result << "\nZero: ";
                 zero = (result == 0);
                 cout << dec << zero << endl;
