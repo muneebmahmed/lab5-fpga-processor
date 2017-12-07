@@ -78,53 +78,17 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 
 	output reg [31:0] ALUResult;	// answer
 	output Zero;	    // Zero=1 if ALUResult == 0
-	
+	wire [31:0] Sum;
 	reg [31:0] X;
-	reg [31:0] Result;
+	integer Result;
 	reg [4:0] I;
-
-	reg [5:0] lookup [0:31];
-
-	initial begin
-		lookup[0] <= 0;
-		lookup[1] <= 31;
-		lookup[2] <= 9;
-		lookup[3] <= 30;
-		lookup[4] <= 3;
-		lookup[5] <= 8;
-		lookup[6] <= 13;
-		lookup[7] <= 29;
-		lookup[8] <= 2;
-		lookup[9] <= 5;
-		lookup[10] <= 7;
-		lookup[11] <= 21;
-		lookup[12] <= 12;
-		lookup[13] <= 24;
-		lookup[14] <= 28;
-		lookup[15] <= 19;
-		lookup[16] <= 1;
-		lookup[17] <= 10;
-		lookup[18] <= 4;
-		lookup[19] <= 14;
-		lookup[20] <= 6;
-		lookup[21] <= 22;
-		lookup[22] <= 25;
-		lookup[23] <= 20;
-		lookup[24] <= 11;
-		lookup[25] <= 15;
-		lookup[26] <= 23;
-		lookup[27] <= 26;
-		lookup[28] <= 16;
-		lookup[29] <= 27;
-		lookup[30] <= 17;
-		lookup[31] <= 18;
-	end
+	//CLA add(A,B,Sum);
 
 
 	always @(ALUControl, A, B) begin
 		case (ALUControl)
 			0: begin
-				ALUResult <= A + B;
+				ALUResult <= A+B+32'd0;
 			end
 			1: begin
 				ALUResult <= A - B;
@@ -158,22 +122,6 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			end
 			11: begin
 			    X = ~A;
-			    X = X | (X >> 1);
-			    X = X | (X >> 2);
-			    X = X | (X >> 4);
-			    X = X | (X >> 8);
-			    X = X | (X >> 16);
-			    X = X + 1;
-			    X = X * 32'h076BE629;
-			    if ( A == 32'hFFFFFFFF) begin
-			        ALUResult = 32;
-			    end
-			    else begin
-			        ALUResult = lookup[X[31:27]];
-			    end
-
-			    /*
-			    X = ~A;
 			    Result = 0;
 			    for (I = 16; |I; I = I >> 1) begin
 			        if (|(X >> I))
@@ -181,10 +129,11 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			        else
 			            Result = Result + I;
 			    end
-			    ALUResult = Result;
+			    
 			    if (A == 32'hFFFFFFFF)
 			        ALUResult = 32;
-			    */
+			        else
+			        ALUResult = Result;
 			    /*
 			    while (A[I]) begin
 			         Result = Result + 1;
@@ -193,21 +142,6 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			    
 			end
 			12: begin
-			    X = A;
-			    X = X | (X >> 1);
-			    X = X | (X >> 2);
-			    X = X | (X >> 4);
-			    X = X | (X >> 8);
-			    X = X | (X >> 16);
-			    X = X + 1;
-			    X = X * 32'h076BE629;
-			    if ( A == 0) begin
-			        ALUResult = 32;
-			    end
-			    else begin
-			        ALUResult = lookup[X[31:27]];
-			    end
-			    /*
 			    Result = 0;
 			    X = A;
 			    for (I = 16; |I; I = I >> 1) begin
@@ -216,10 +150,11 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			        else
 			            Result = Result + I;
 			    end
-			    ALUResult = Result;
+			   
 			    if (A == 0)
 			        ALUResult = 32;
-			    */
+			        else
+			         ALUResult = Result;
 			    /*
 			    I = 31;
 			    while (~A[I] && I >= 0) begin
@@ -228,7 +163,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			    end*/
 			end
 			default: begin
-				ALUResult <= 32'h0;
+				ALUResult <= 32'd0;
 			end
 		endcase
 		//Zero = (ALUResult == 0)? 1 : 0;

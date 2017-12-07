@@ -37,9 +37,9 @@ module TopProcessor(Clk, Reset, WriteData);
 
 	Datapath datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData, debug_Reg8, debug_Reg16, debug_Reg17, debug_Reg18, debug_Reg19);
 
-	//ClkDiv(Clk, Hold_Clk, Clk_out);
+	//ClkDiv clkdiv(Clk, Hold_Clk, Clk_out);
 	//Datapath datapath(Clk_out, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData, debug_Reg8, debug_Reg16, debug_Reg17, debug_Reg18, debug_Reg19);
-	//TwoDigitDisplay(Clk, debug_Reg16[6:0], out7, en_out);
+	//TwoDigitDisplay disp(Clk, debug_Reg16[6:0], out7, en_out);
 
 	//module Datapath(Clk, Reset, ALUOp, ALUSrc, MemRead, MemWrite, MemtoReg, RegWrite, PCSrc, ReadReg1, ReadReg2, WriteReg, SEInstruction, Shmt, ALUSrc2, Instruction, WriteData);
 
